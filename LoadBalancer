@@ -1,0 +1,52 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class LoadBalancer {
+
+    // Memoization cache to store results of subproblems
+    private static Map<String, Integer> memoizationCache = new HashMap<>();
+
+    public static void main(String[] args) {
+        // Example server capacities
+        int[] serverCapacities = {10, 15, 20};
+
+        // Example total workload
+        int totalWorkload = 30;
+
+        // Find the optimal way to distribute the workload
+        int optimalDistribution = findOptimalDistribution(serverCapacities, totalWorkload);
+
+        System.out.println("Optimal Distribution: " + optimalDistribution);
+    }
+
+    // Dynamic programming function to find optimal distribution
+    private static int findOptimalDistribution(int[] serverCapacities, int remainingWorkload) {
+        // Base case: If no remaining workload, the distribution is optimal
+        if (remainingWorkload == 0) {
+            return 0;
+        }
+
+        // Check if the result is already memoized
+        String memoizationKey = remainingWorkload + Arrays.toString(serverCapacities);
+        if (memoizationCache.containsKey(memoizationKey)) {
+            return memoizationCache.get(memoizationKey);
+        }
+
+        int minDistribution = Integer.MAX_VALUE;
+
+        // Iterate through each server and try different distributions
+        for (int capacity : serverCapacities) {
+            if (remainingWorkload >= capacity) {
+                // Recursively find the optimal distribution for the remaining workload
+                int distribution = 1 + findOptimalDistribution(serverCapacities, remainingWorkload - capacity);
+
+                // Update the minimum distribution if a better solution is found
+                minDistribution = Math.min(minDistribution, distribution);
+            }
+        }
+
+        // Memoize the result before returning
+        memoizationCache.put(memoizationKey, minDistribution);
+        return minDistribution;
+    }
+}
