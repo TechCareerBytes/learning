@@ -1,0 +1,26 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class TopDownFibonacci {
+    private static Map<Integer, Integer> memoizationCache = new HashMap<>();
+
+    public static int fibonacci(int n) {
+        if (n <= 1) {
+            return n;
+        }
+
+        if (memoizationCache.containsKey(n)) {
+            return memoizationCache.get(n);
+        }
+
+        int result = fibonacci(n - 1) + fibonacci(n - 2);
+        memoizationCache.put(n, result);
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+        int n = 5;
+        System.out.println("Fibonacci(" + n + ") = " + fibonacci(n));
+    }
+}
