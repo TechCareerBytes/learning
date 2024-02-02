@@ -1,17 +1,21 @@
 import java.util.Arrays;
 
 public class LoadBalancerTabulation {
+    static int[] dp;
     public static void main(String[] args) {
         int[] serverCapacities = {10, 15, 20};
-        int totalWorkload = 30;
+        int totalWorkload = 12;
 
         int optimalDistribution = findOptimalDistribution(serverCapacities, totalWorkload);
 
         System.out.println("Optimal Distribution: " + optimalDistribution);
+
+        // Additional logic to print the details of each distribution
+        printDistributionDetails(serverCapacities, totalWorkload);
     }
 
     private static int findOptimalDistribution(int[] serverCapacities, int totalWorkload) {
-        int[] dp = new int[totalWorkload + 1];
+        dp = new int[totalWorkload + 1];
         Arrays.fill(dp, Integer.MAX_VALUE);
         dp[0] = 0;
 
@@ -24,5 +28,20 @@ public class LoadBalancerTabulation {
         }
 
         return dp[totalWorkload];
+    }
+
+    private static void printDistributionDetails(int[] serverCapacities, int totalWorkload) {
+        // Additional logic to track distribution details
+        int remainingWorkload = totalWorkload;
+
+        while (remainingWorkload > 0) {
+            for (int capacity : serverCapacities) {
+                if (remainingWorkload >= capacity && dp[remainingWorkload] == 1 + dp[remainingWorkload - capacity]) {
+                    System.out.println("Distribute " + capacity + " units to a server");
+                    remainingWorkload -= capacity;
+                    break; // Move to the next distribution
+                }
+            }
+        }
     }
 }
