@@ -1,0 +1,29 @@
+import java.util.Arrays;
+
+public class LoadBalancerDynamicProgramming {
+
+    public static void main(String[] args) {
+        int[] serverCapacities = {10, 15, 20};
+        int totalWorkload = 30;
+
+        int optimalDistribution = findOptimalDistribution(serverCapacities, totalWorkload);
+
+        System.out.println("Optimal Distribution: " + (optimalDistribution == Integer.MAX_VALUE ? "No valid distribution" : optimalDistribution));
+    }
+
+    private static int findOptimalDistribution(int[] serverCapacities, int totalWorkload) {
+        int[] dp = new int[totalWorkload + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+
+        for (int i = 1; i <= totalWorkload; i++) {
+            for (int capacity : serverCapacities) {
+                if (i >= capacity && dp[i - capacity] != Integer.MAX_VALUE) {
+                    dp[i] = Math.min(dp[i], 1 + dp[i - capacity]);
+                }
+            }
+        }
+
+        return dp[totalWorkload];
+    }
+}
