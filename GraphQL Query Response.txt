@@ -1,0 +1,19 @@
+{
+  "data": {
+    "user": {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "friends": [
+        {
+          "id": "2",
+          "name": "Jane Smith"
+        },
+        {
+          "id": "3",
+          "name": "Mike Johnson"
+        }
+      ]
+    }
+  }
+}

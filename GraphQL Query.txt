@@ -1,0 +1,11 @@
+query {
+  user(id: "1") {
+    id
+    name
+    email
+    friends {
+      id
+      name
+    }
+  }
+}
