@@ -1,0 +1,84 @@
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+class PBFTNode {
+    private String nodeId;
+    private Set<String> prepareMessages = new HashSet<>();
+    private Set<String> commitMessages = new HashSet<>();
+    private static final int CONSENSUS_THRESHOLD = 3; // Example threshold for 4 nodes
+
+    public PBFTNode(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    // Pre-Prepare phase: Initiates transaction request
+    public void prePrepare(Transaction txn) {
+        System.out.println("Node " + nodeId + " initiating Pre-Prepare for transaction: " + txn);
+        sendPrepare(txn);  // Move to Prepare phase
+    }
+
+    // Prepare phase: Validate transaction, and broadcast Prepare message
+    private void sendPrepare(Transaction txn) {
+        System.out.println("Node " + nodeId + " sending Prepare message for transaction: " + txn);
+        prepareMessages.add(txn.getId());
+        if (prepareMessages.size() >= CONSENSUS_THRESHOLD) {
+            sendCommit(txn);  // Move to Commit phase
+        }
+    }
+
+    // Commit phase: Broadcast Commit message after enough Prepare messages received
+    private void sendCommit(Transaction txn) {
+        System.out.println("Node " + nodeId + " sending Commit message for transaction: " + txn);
+        commitMessages.add(txn.getId());
+        if (commitMessages.size() >= CONSENSUS_THRESHOLD) {
+            reply(txn);  // Final Reply phase
+        }
+    }
+
+    // Reply phase: Transaction is now considered committed after consensus
+    private void reply(Transaction txn) {
+        System.out.println("Node " + nodeId + " has reached consensus for transaction: " + txn);
+    }
+}
+
+class Transaction {
+    private String id;
+    private double amount;
+
+    public Transaction(String id, double amount) {
+        this.id = id;
+        this.amount = amount;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" + "id='" + id + '\'' + ", amount=" + amount + '}';
+    }
+}
+
+public class PBFTNetworkSimulator {
+    public static void main(String[] args) {
+        // Initialize nodes in the network
+        PBFTNode node1 = new PBFTNode("Node1");
+        PBFTNode node2 = new PBFTNode("Node2");
+        PBFTNode node3 = new PBFTNode("Node3");
+        PBFTNode node4 = new PBFTNode("Node4");
+
+        // Sample transaction
+        Transaction txn = new Transaction("TXN1001", 1000);
+
+        // Simulate the Pre-Prepare phase from Node1 as the leader
+        node1.prePrepare(txn);
+
+        // For simplicity, trigger Prepare and Commit phases in other nodes
+        node2.prePrepare(txn);
+        node3.prePrepare(txn);
+        node4.prePrepare(txn);
+    }
+}
