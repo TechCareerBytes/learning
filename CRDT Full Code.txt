@@ -1,0 +1,100 @@
+import java.util.ArrayList;
+import java.util.List;
+
+// Operation represents a single change in the document
+abstract class Operation {
+    int position;
+    String character;
+    String id;
+
+    Operation(int position, String character, String id) {
+        this.position = position;
+        this.character = character;
+        this.id = id;
+    }
+    abstract void apply(List<String> document);
+}
+
+// Insert Operation for CRDT
+class InsertOperation extends Operation {
+    InsertOperation(int position, String character, String id) {
+        super(position, character, id);
+    }
+
+    @Override
+    void apply(List<String> document) {
+        document.add(position, character);
+    }
+}
+
+// Delete Operation for CRDT
+class DeleteOperation extends Operation {
+    DeleteOperation(int position, String character, String id) {
+        super(position, character, id);
+    }
+
+    @Override
+    void apply(List<String> document) {
+        if (position < document.size()) {
+            document.remove(position);
+        }
+    }
+}
+
+// CRDT Document for collaborative editing
+class CRDTDocument {
+    private List<String> document = new ArrayList<>();
+    private List<Operation> history = new ArrayList<>();
+
+    // Apply operation and add it to history
+    public void applyOperation(Operation op) {
+        op.apply(document);
+        history.add(op);
+    }
+
+    // Merge remote operations to achieve consistency across replicas
+    public void merge(List<Operation> remoteOperations) {
+        for (Operation op : remoteOperations) {
+            if (!history.contains(op)) { // Only apply if operation is new
+                applyOperation(op);
+            }
+        }
+    }
+
+    // Display document content
+    public void display() {
+        System.out.println(String.join("", document));
+    }
+
+    // Get current document state for synchronization
+    public List<Operation> getHistory() {
+        return history;
+    }
+}
+
+// Main class to simulate collaborative editing
+public class CollaborativeEditor {
+    public static void main(String[] args) {
+        CRDTDocument user1Doc = new CRDTDocument();
+        CRDTDocument user2Doc = new CRDTDocument();
+
+        // Simulate user1's insert and delete operations
+        user1Doc.applyOperation(new InsertOperation(0, "H", "op1"));
+        user1Doc.applyOperation(new InsertOperation(1, "e", "op2"));
+        user1Doc.applyOperation(new InsertOperation(2, "l", "op3"));
+        user1Doc.applyOperation(new DeleteOperation(1, "e", "op4"));
+        user1Doc.display();  // Expected output: "Hl"
+
+        // Sync operations to user2's document
+        user2Doc.merge(user1Doc.getHistory());
+        user2Doc.display();  // Expected output: "Hl"
+
+        // Simulate user2's insert operation
+        user2Doc.applyOperation(new InsertOperation(1, "e", "op5"));
+        user2Doc.display();  // Expected output: "Hel"
+
+        // Sync back to user1's document to achieve consistency
+        user1Doc.merge(user2Doc.getHistory());
+        user1Doc.display();  // Expected output: "Hel"
+    }
+}
