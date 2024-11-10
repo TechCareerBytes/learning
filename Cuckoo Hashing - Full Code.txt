@@ -1,0 +1,87 @@
+import java.util.Arrays;
+
+class CuckooHashTable {
+    private int[] table1;
+    private int[] table2;
+    private int capacity;
+    private int numHashFunctions = 2;
+    
+    public CuckooHashTable(int capacity) {
+        this.capacity = capacity;
+        this.table1 = new int[capacity];
+        this.table2 = new int[capacity];
+        Arrays.fill(table1, -1);
+        Arrays.fill(table2, -1);
+    }
+    
+    // Hash functions
+    private int hash1(int key) {
+        return key % capacity;
+    }
+
+    private int hash2(int key) {
+        return (key / capacity) % capacity;
+    }
+    
+    public boolean insert(int key) {
+        int pos1 = hash1(key);
+        
+        // Try to insert in table1
+        if (table1[pos1] == -1) {
+            table1[pos1] = key;
+            return true;
+        }
+        
+        int pos2 = hash2(key);
+        
+        // Try to insert in table2
+        if (table2[pos2] == -1) {
+            table2[pos2] = key;
+            return true;
+        }
+        
+        // Perform cuckooing
+        return cuckoo(key, 0);
+    }
+    
+    private boolean cuckoo(int key, int depth) {
+        if (depth >= capacity) {
+            System.out.println("Cycle detected! Rehashing needed.");
+            return false;
+        }
+        
+        int pos1 = hash1(key);
+        int displaced = table1[pos1];
+        table1[pos1] = key;
+        
+        int pos2 = hash2(displaced);
+        if (table2[pos2] == -1) {
+            table2[pos2] = displaced;
+            return true;
+        } else {
+            return cuckoo(displaced, depth + 1);
+        }
+    }
+    
+    public boolean contains(int key) {
+        int pos1 = hash1(key);
+        if (table1[pos1] == key) return true;
+        
+        int pos2 = hash2(key);
+        return table2[pos2] == key;
+    }
+}
+
+public class CuckooHashingExample {
+    public static void main(String[] args) {
+        CuckooHashTable hashTable = new CuckooHashTable(11);
+        hashTable.insert(20);
+        hashTable.insert(50);
+        hashTable.insert(53);
+        hashTable.insert(75);
+        hashTable.insert(100);
+        
+        System.out.println(hashTable.contains(50));  // Output: true
+        System.out.println(hashTable.contains(76));  // Output: false
+    }
+}
